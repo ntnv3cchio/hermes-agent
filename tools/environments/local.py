@@ -1019,13 +1019,6 @@ def _kill_process_group_posix(proc) -> None:
                     proc.wait(timeout=0.2)
         except ProcessLookupError:
             pass
-        except PermissionError:
-            # macOS answers killpg with EPERM (not ESRCH) once the group's only members are
-            # unreaped zombies — rg exiting between the caller's poll() and the TERM after the
-            # drain hit its limit (#116855). Nothing group-wide is signalable, and the error
-            # must not escape: the caller still owns the output it drained. Signal the known
-            # PIDs instead so a live child (a group we may not signal) cannot outlive us.
-            _kill_known_pids(proc, descendants)
     _sweep_escaped_descendants(descendants, pgid)
 
 
